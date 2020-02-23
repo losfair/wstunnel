@@ -1,0 +1,11 @@
+[Unit]
+Description=WebSocket Tunnel
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/wstunnel -c /etc/wstunnel.toml -t wstunnel -l 127.0.0.1:1279
+CapabilityBoundingSet=CAP_NET_ADMIN
+
+[Install]
+WantedBy=multi-user.target
