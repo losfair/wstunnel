@@ -117,6 +117,9 @@ async fn main() -> Result<(), String> {
     let config: PreparedConfig = config.prepare_leaky()?;
 
     let mut tun_conf = tun::Configuration::default();
+    if let Some(ref name) = opt.tun {
+        tun_conf.name(name);
+    }
     if let Some((ref ipv4, ref mask)) = config.ipv4 {
         tun_conf.address(&ipv4.me);
         tun_conf.netmask(mask.0);
