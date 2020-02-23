@@ -7,7 +7,7 @@ Try [a modified version of JSLinux](https://jslinux.invariant.me) to see how it 
 ## Server usage
 
 ```
-$ cargo install wstunnel
+$ cargo install --git https://github.com/losfair/wstunnel wstunnel
 $ wstunnel --help
 wstunnel 0.1.0
 WebSocket layer 3 tunnel with authentication
