@@ -273,9 +273,12 @@ async fn do_handle_connection(
         .await
         .e2s("cannot send header to client")?;
     let mut tun_w_tx = server.tun_w_tx.clone();
+    let mut ping_sent = false;
     loop {
         let stream_fut = stream.next();
         let tun_fut = tun_r_rx.next();
+        let timeout_fut = delay_for(Duration::from_secs(10));
+
         tokio::select! {
             msg = stream_fut => {
                 match msg {
@@ -296,6 +299,15 @@ async fn do_handle_connection(
                             tun_w_tx.send(x).await.e2s("cannot send data to tun device")?;
                         }
                     }
+                    Some(Ok(Message::Ping(x))) => {
+                        stream.send(Message::Pong(x)).await.e2s("cannot send pong")?;
+                    }
+                    Some(Ok(Message::Pong(_))) => {
+                        if !ping_sent {
+                            return Err("received pong without a previous ping".into());
+                        }
+                        ping_sent = false;
+                    }
                     Some(Ok(Message::Close(_))) => return Ok(()),
                     Some(x) => {
                         return Err(format!("unexpected client message: {:?}", x));
@@ -309,6 +321,14 @@ async fn do_handle_connection(
                         stream.send(Message::Binary(msg)).await.e2s("cannot send data to client")?;
                     }
                     None => return Ok(())
+                }
+            }
+            _ = timeout_fut => {
+                if ping_sent {
+                    return Err("timeout".into());
+                } else {
+                    stream.send(Message::Ping(vec![])).await.e2s("cannot send ping")?;
+                    ping_sent = true;
                 }
             }
         }
