@@ -1,0 +1,15 @@
+[ipv4]
+range = { start = "192.168.30.1", end = "192.168.30.254" }
+dynamic_range = { start = "192.168.30.20", end = "192.168.30.254" }
+me = "192.168.30.1"
+prefix_length = 24
+
+[ipv6]
+range = { start = "fd00::1", end = "fd00::ffff" }
+dynamic_range = { start = "fd00::100", end = "fd00::ffff" }
+me = "fd00::1"
+prefix_length = 64
+
+[rate_limit]
+base_kbytes_per_sec = 128
+burst_kbytes = 4096
