@@ -26,3 +26,7 @@ OPTIONS:
 ```
 
 An example config file is available at `test_config.toml`.
+
+## Install as a systemd service
+
+Take a look at `wstunnel.service`. Copy it to `/etc/systemd/system/`, change `/usr/bin/wstunnel` to your binary path and change `/etc/wstunnel.toml` to your configuration path. By default the service listens on `127.0.0.1:1279` and it's suggested to put `wstunnel` behind a secure reverse proxy.
