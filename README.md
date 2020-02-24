@@ -2,7 +2,7 @@
 
 Tunnel IP over websocket.
 
-Try [a modified version of JSLinux](https://jslinux.invariant.me) to see how it works. Watch the browser's dev-console as required VM network configuration changes will be printed there.
+Try [a modified version of JSLinux](https://invariant.me/try-jslinux/) to see it working!
 
 ## Server usage
 
