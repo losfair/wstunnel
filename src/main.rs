@@ -4,6 +4,7 @@ mod util;
 use config::*;
 use etherparse::{Ipv4HeaderSlice, Ipv6HeaderSlice};
 use futures::SinkExt;
+use serde::Serialize;
 use slab::Slab;
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
@@ -262,11 +263,32 @@ async fn do_handle_connection(
     _peer_addr: SocketAddr,
     server: &'static Server,
 ) -> Result<(), String> {
+    #[derive(Serialize, Clone, Debug)]
+    struct ClientIpConf<T> {
+        address: T,
+        gateway: T,
+        prefix_length: u8,
+    }
+
     stream
         .send(Message::Text(
             serde_json::json!({
-                "ipv4": ipv4_addr,
-                "ipv6": ipv6_addr
+                "ipv4": ipv4_addr.map(|x| {
+                    let conf = &server.config.ipv4.as_ref().unwrap().0;
+                    ClientIpConf {
+                        address: x,
+                        gateway: conf.me,
+                        prefix_length: conf.prefix_length,
+                    }
+                }),
+                "ipv6": ipv6_addr.map(|x| {
+                    let conf = server.config.ipv6.as_ref().unwrap();
+                    ClientIpConf {
+                        address: x,
+                        gateway: conf.me,
+                        prefix_length: conf.prefix_length,
+                    }
+                }),
             })
             .to_string(),
         ))
