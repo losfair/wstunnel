@@ -13,3 +13,15 @@ prefix_length = 64
 [rate_limit]
 base_kbytes_per_sec = 128
 burst_kbytes = 4096
+
+[scs]
+authorized_users = ["c957317d-3cde-4e81-9bd0-dfd0b25db428"]
+service_url = "https://scs.invariant.me"
+public_key = '''
+-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAESMSrPekGhp1jNMiRHT/tZyVBWGqQ5RFr
+zmqVHIvJbNpxdmPzF98gjaaE7AtlQhbbSu8r92Pzr5jrDAsB2kGVJjXjmEBAUZ5A
+Qn/pHCkw9oqhqHgC+Wm5fC3/eoi+Wjck
+-----END PUBLIC KEY-----
+'''
+signature_ttl_seconds = 60
