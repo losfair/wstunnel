@@ -24,3 +24,4 @@ serde_json = "1.0.48"
 chrono = "0.4.10"
 anyhow = "1.0"
 thiserror = "1.0"
+scs-client = { path = "../scs-client" }

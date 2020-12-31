@@ -4,7 +4,7 @@ mod error;
 use config::*;
 use etherparse::{Ipv4HeaderSlice, Ipv6HeaderSlice};
 use futures::SinkExt;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use slab::Slab;
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
@@ -268,6 +268,33 @@ async fn do_handle_connection(
         address: T,
         gateway: T,
         prefix_length: u8,
+    }
+
+    #[derive(Deserialize)]
+    struct AuthMsg {
+        #[serde(rename = "wstunnelAuthV1")]
+        wstunnel_auth_v1: bool,
+    }
+
+    if let Some((ref scs, ref client)) = server.config.scs {
+        let auth_msg = stream.next().await.ok_or(TunError::Other("eof before auth".into()))?.e2s("failed to receive authentication message")?;
+        match auth_msg {
+            Message::Text(t) => {
+                let cmd = serde_json::from_str(&t).e2s("bad auth message format")?;
+                let (device_id, initiator, body): (_, _, AuthMsg) = client.unwrap_command_with_ttl_check(&cmd, Duration::from_secs(scs.signature_ttl_seconds))
+                    .e2s("bad auth message signature")?;
+                if !scs.authorized_users.contains(&initiator.0) {
+                    return Err("initiator not authorized".into());
+                }
+
+                if !body.wstunnel_auth_v1 {
+                    return Err("bad auth field".into());
+                }
+
+                println!("authentication succeeded for device {}, initiator {}", device_id.0, initiator.0);
+            }
+            _ => return Err("bad auth message type".into()),
+        }
     }
 
     stream

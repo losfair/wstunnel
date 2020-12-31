@@ -26,6 +26,7 @@ pub struct ScsConfig {
     pub authorized_users: BTreeSet<String>,
     pub public_key: String,
     pub service_url: String,
+    pub signature_ttl_seconds: u64,
 }
 
 #[derive(Deserialize, Clone, Debug)]
