@@ -1,8 +1,12 @@
 use thiserror::Error;
 use std::fmt::Debug;
+use scs_client::error::ScsError;
 
-#[derive(Error, Debug, Clone)]
+#[derive(Error, Debug)]
 pub enum TunError {
+    #[error("scs: {0}")]
+    Scs(ScsError),
+
     #[error("other: {0}")]
     Other(String),
 }
@@ -10,6 +14,12 @@ pub enum TunError {
 impl From<&str> for TunError {
     fn from(other: &str) -> Self {
         Self::Other(other.to_string())
+    }
+}
+
+impl From<ScsError> for TunError {
+    fn from(other: ScsError) -> Self {
+        Self::Scs(other)
     }
 }
 

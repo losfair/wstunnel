@@ -5,6 +5,7 @@ use std::fmt::Debug;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::ops::RangeInclusive;
 use std::collections::BTreeSet;
+use scs_client::client::{ClientConfig, DeviceClient};
 
 const IPV4_MAX_DYNRANGE: u32 = 65536;
 const IPV6_MAX_DYNRANGE: u128 = 65536;
@@ -41,12 +42,12 @@ pub struct IpConfig<T> {
     pub prefix_length: u8,
 }
 
-#[derive(Clone, Debug)]
 pub struct PreparedConfig {
     pub jwt_key: Option<DecodingKey<'static>>,
     pub rate_limit: Option<RateLimit>,
     pub ipv4: Option<(IpConfig<Ipv4Addr>, Ipv4Mask)>,
     pub ipv6: Option<IpConfig<Ipv6Addr>>,
+    pub scs: Option<(ScsConfig, DeviceClient)>,
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -96,6 +97,17 @@ impl Config {
                     return Err("ipv6 prefix length mismatches with range".into());
                 }
                 Some(ipv6)
+            } else {
+                None
+            },
+            scs: if let Some(scs) = self.scs {
+                let client = ClientConfig::default()
+                    .with_public_key(&scs.public_key)?
+                    .with_service_url(&scs.service_url)?
+                    .with_device_id("")? // dummy values here because we don't connect to the server
+                    .with_device_secret("")?
+                    .finalize_device()?;
+                Some((scs, client))
             } else {
                 None
             },
