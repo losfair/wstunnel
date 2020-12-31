@@ -1,9 +1,10 @@
-use crate::util::*;
+use crate::error::*;
 use jsonwebtoken::DecodingKey;
 use serde::Deserialize;
 use std::fmt::Debug;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::ops::RangeInclusive;
+use std::collections::BTreeSet;
 
 const IPV4_MAX_DYNRANGE: u32 = 65536;
 const IPV6_MAX_DYNRANGE: u128 = 65536;
@@ -16,6 +17,14 @@ pub struct Config {
     pub rate_limit: Option<RateLimit>,
     pub ipv4: Option<IpConfig<Ipv4Addr>>,
     pub ipv6: Option<IpConfig<Ipv6Addr>>,
+    pub scs: Option<ScsConfig>,
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct ScsConfig {
+    pub authorized_users: BTreeSet<String>,
+    pub public_key: String,
+    pub service_url: String,
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -44,7 +53,7 @@ pub struct PreparedConfig {
 pub struct Ipv4Mask(pub Ipv4Addr);
 
 impl Config {
-    pub fn prepare_leaky(self) -> Result<PreparedConfig, String> {
+    pub fn prepare_leaky(self) -> Result<PreparedConfig, TunError> {
         Ok(PreparedConfig {
             jwt_key: if let Some(key) = self.jwt_key {
                 Some(
@@ -95,7 +104,7 @@ impl Config {
 }
 
 impl<T: Ord> IpConfig<T> {
-    fn validate(&self) -> Result<(), String> {
+    fn validate(&self) -> Result<(), TunError> {
         if self.range.start() > self.range.end() {
             return Err("invalid range".into());
         }

@@ -1,5 +1,5 @@
 mod config;
-mod util;
+mod error;
 
 use config::*;
 use etherparse::{Ipv4HeaderSlice, Ipv6HeaderSlice};
@@ -24,7 +24,7 @@ use tokio::{
 };
 use tokio_tungstenite::{accept_async, tungstenite::Message, WebSocketStream};
 use tun::{r#async::DeviceAsync, TunPacket};
-use util::*;
+use error::*;
 
 const WS_MTU: usize = 1500;
 
@@ -102,7 +102,7 @@ impl Server {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), String> {
+async fn main() -> Result<(), TunError> {
     let opt = Opt::from_args();
 
     let mut config_file = File::open(&opt.config)
@@ -262,7 +262,7 @@ async fn do_handle_connection(
     ipv6_addr: Option<Ipv6Addr>,
     _peer_addr: SocketAddr,
     server: &'static Server,
-) -> Result<(), String> {
+) -> Result<(), TunError> {
     #[derive(Serialize, Clone, Debug)]
     struct ClientIpConf<T> {
         address: T,
@@ -332,7 +332,7 @@ async fn do_handle_connection(
                     }
                     Some(Ok(Message::Close(_))) => return Ok(()),
                     Some(x) => {
-                        return Err(format!("unexpected client message: {:?}", x));
+                        return Err(TunError::Other(format!("unexpected client message: {:?}", x)));
                     }
                     None => return Ok(())
                 }
@@ -413,7 +413,7 @@ async fn tun_handler(server: &'static Server, dev: DeviceAsync, mut w_rx: Receiv
     }
 }
 
-fn extract_dstaddr(pkt: &[u8]) -> Result<IpAddr, String> {
+fn extract_dstaddr(pkt: &[u8]) -> Result<IpAddr, TunError> {
     if pkt.len() == 0 {
         return Err("empty packet".into());
     }
@@ -430,7 +430,7 @@ fn extract_dstaddr(pkt: &[u8]) -> Result<IpAddr, String> {
     })
 }
 
-fn extract_srcaddr(pkt: &[u8]) -> Result<IpAddr, String> {
+fn extract_srcaddr(pkt: &[u8]) -> Result<IpAddr, TunError> {
     if pkt.len() == 0 {
         return Err("empty packet".into());
     }

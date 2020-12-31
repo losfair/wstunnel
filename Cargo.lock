@@ -994,6 +994,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "thiserror"
+version = "1.0.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "318234ffa22e0920fe9a40d7b8369b5f649d490980cf7aadcf1eb91594869b42"
+dependencies = [
+ "thiserror-impl",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "1.0.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cae2447b6282786c3493999f40a9be2a6ad20cb8bd268b0a0dbf5a065535c0ab"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "thread_local"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1347,6 +1367,7 @@ dependencies = [
 name = "wstunnel"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "chrono",
  "etherparse",
  "futures",
@@ -1355,6 +1376,7 @@ dependencies = [
  "serde_json",
  "slab",
  "structopt",
+ "thiserror",
  "tokio",
  "tokio-tungstenite",
  "toml",
